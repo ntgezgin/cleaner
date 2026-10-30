@@ -268,9 +268,16 @@ class Classifier(object):
                     break
             child_pc = None
             if item_rule is not None and item_rule.per_child:
-                node.cat = CAT_CODE[item_rule.cat]
+                # e.g. Program Files: big children get uninstall advice, the folder stays NEVER
+                never_lock = None
+                for r in matches:
+                    if r.cat == "never" and r.lock in ("soft", "exact"):
+                        never_lock = self._stronger(never_lock, Lock(r.lock, r, node.path))
+                node.cat = "n" if never_lock is not None else CAT_CODE[item_rule.cat]
                 child_pc = (item_rule, evidence)
-                lock = self._stronger(lock, Lock("exact", None, node.path, item_rule.title))
+                lock = self._stronger(lock, never_lock or Lock("exact", None, node.path,
+                                                               item_rule.title))
+                node.lock = lock
             elif item_rule is not None:
                 it = self.make_item(node, item_rule, evidence, title=self._title(item_rule, node))
                 if it is not None:

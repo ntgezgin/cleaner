@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'">
+<title>__TITLE__</title>
+<style>
+/*__STYLE__*/
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <h1>Disk raporu</h1>
+      <div class="sub" id="meta-line"></div>
+    </div>
+    <div class="top-actions">
+      <span class="ro-badge" title="Bu sayfa ve tarayıcı hiçbir dosyayı değiştirmez">Salt-okunur rapor</span>
+      <div class="seg" role="group" aria-label="Tema">
+        <button type="button" data-theme-set="auto">Otomatik</button>
+        <button type="button" data-theme-set="light">Açık</button>
+        <button type="button" data-theme-set="dark">Koyu</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="cards" id="cards" aria-label="Özet"></section>
+  <details class="disks-wrap" id="disks-wrap">
+    <summary>Diskler ve taranan alan</summary>
+    <div class="table-scroll"><table class="tbl" id="disks"></table></div>
+  </details>
+
+  <nav class="tabs" role="tablist" id="tabs">
+    <button role="tab" data-tab="explorer" aria-selected="true">Gezgin</button>
+    <button role="tab" data-tab="recs">Öneriler <span class="count" id="recs-count"></span></button>
+    <button role="tab" data-tab="files">En büyük 50 dosya</button>
+    <button role="tab" data-tab="dirs">En büyük klasörler</button>
+    <button role="tab" data-tab="repos">Projeler (git) <span class="count" id="repos-count"></span></button>
+    <button role="tab" data-tab="info">Taranamayanlar ve notlar <span class="count" id="ns-count"></span></button>
+  </nav>
+
+  <section class="tab" id="tab-explorer">
+    <div class="legend" id="legend"></div>
+    <nav class="crumbs" id="crumbs" aria-label="Konum"></nav>
+    <div class="explorer">
+      <div class="treemap" id="treemap" role="img" aria-label="Klasör boyutları treemap"></div>
+      <aside class="details" id="details"><p class="muted">Ayrıntı görmek için bir kutunun üzerine gel. Klasöre tıklayınca içine inersin.</p></aside>
+    </div>
+    <p class="hint">Kutu alanı = diskte kapladığı yer. Alt çizgideki yeşil/sarı şerit o klasörde temizlenebilecek Safe/Review payını gösterir. Taralı + kilitli kutular NEVER: seçilemez, script'e asla girmez.</p>
+  </section>
+
+  <section class="tab" id="tab-recs" hidden>
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Kategori filtresi" id="cat-filter">
+        <button type="button" data-cat="all" aria-pressed="true">Tümü</button>
+        <button type="button" data-cat="safe">Safe</button>
+        <button type="button" data-cat="review">Review</button>
+        <button type="button" data-cat="never">Never</button>
+      </div>
+      <input type="search" id="rec-search" placeholder="Ara: ad veya yol…" aria-label="Önerilerde ara">
+      <label class="chk"><input type="checkbox" id="only-selected"> Sadece seçililer</label>
+      <select id="rec-sort" aria-label="Sıralama">
+        <option value="size">Boyuta göre</option>
+        <option value="age">En eski önce</option>
+        <option value="name">Ada göre</option>
+      </select>
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost" id="sel-safe">Tüm Safe'i seç</button>
+      <button type="button" class="btn ghost" id="sel-none">Seçimi temizle</button>
+      <button type="button" class="btn ghost" id="sel-reset">Varsayılana dön</button>
+    </div>
+    <div id="recs"></div>
+  </section>
+
+  <section class="tab" id="tab-files" hidden>
+    <div class="table-scroll"><table class="tbl sortable" id="files"></table></div>
+  </section>
+
+  <section class="tab" id="tab-dirs" hidden>
+    <div class="toolbar"><label class="chk"><input type="checkbox" id="hide-wrap" checked> Tek alt klasörden ibaret sarmalayıcıları gizle</label></div>
+    <div class="table-scroll"><table class="tbl sortable" id="dirs"></table></div>
+  </section>
+
+  <section class="tab" id="tab-repos" hidden>
+    <p class="hint">Kaynak kod depoları her zaman NEVER. Burada sadece durumlarını görürsün; içlerindeki node_modules / build klasörleri Öneriler'de REVIEW olarak çıkar.</p>
+    <div class="table-scroll"><table class="tbl sortable" id="repos"></table></div>
+  </section>
+
+  <section class="tab" id="tab-info" hidden>
+    <div id="info"></div>
+  </section>
+</main>
+
+<div class="actionbar" id="actionbar">
+  <div class="ab-inner">
+    <div class="ab-sum" id="ab-sum"></div>
+    <button type="button" class="btn primary" id="gen-btn">Cleanup script üret</button>
+  </div>
+</div>
+
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2 id="modal-title">Cleanup script</h2>
+      <button type="button" class="btn ghost" id="modal-close" aria-label="Kapat">Kapat</button>
+    </div>
+    <div class="modal-body">
+      <div class="steps" id="script-steps"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn primary" id="dl-btn">İndir</button>
+        <button type="button" class="btn" id="copy-btn">Kopyala</button>
+        <span class="muted" id="copy-status" aria-live="polite"></span>
+      </div>
+      <textarea id="script-out" spellcheck="false" readonly aria-label="Üretilen script"></textarea>
+    </div>
+  </div>
+</div>
+
+<div class="tip" id="tip" role="tooltip" hidden></div>
+
+<script type="application/json" id="report-data">__DATA__</script>
+<script>
+/*__SCRIPTGEN__*/
+</script>
+<script>
+/*__APP__*/
+</script>
+</body>
+</html>

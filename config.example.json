@@ -1,0 +1,17 @@
+{
+  "never_paths": [
+    "D:\\Projeler",
+    "D:\\Datasets",
+    "~/Recordings"
+  ],
+  "exclude_paths": [
+    "E:\\Backups"
+  ],
+  "extra_roots": [],
+  "stale_days": 180,
+  "home_only": false,
+  "skip_system": false,
+  "all_drives": false,
+  "no_git": false,
+  "no_docker": false
+}

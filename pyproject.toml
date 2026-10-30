@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "disk-cleaner"
+dynamic = ["version"]
+description = "Read-only disk usage analyzer with an offline, interactive cleanup report"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+dependencies = []
+
+[project.scripts]
+disk-cleaner = "disk_cleaner.cli:main"
+
+[tool.setuptools]
+packages = ["disk_cleaner"]
+
+[tool.setuptools.package-data]
+disk_cleaner = ["ui/*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "disk_cleaner.__version__" }

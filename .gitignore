@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+disk-report-*.html
+disk-report-*.json
+disk-cleanup-*.sh
+disk-cleanup-*.ps1
+disk-cleaner.json

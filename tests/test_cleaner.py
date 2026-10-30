@@ -39,9 +39,15 @@ class EnvPatch(object):
                 os.environ[k] = v
 
 
+# PowerShell writes its own startup cache under %LOCALAPPDATA%; that is not the script.
+PS_CACHE = os.path.join("AppData", "Local", "Microsoft", "Windows", "PowerShell")
+
+
 def snapshot(root):
     out = {}
     for dp, dns, fns in os.walk(root):
+        if PS_CACHE in dp:
+            continue
         for f in fns:
             fp = os.path.join(dp, f)
             try:
